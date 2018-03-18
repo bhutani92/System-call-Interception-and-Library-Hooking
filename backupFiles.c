@@ -8,6 +8,7 @@
 #include <time.h>
 #include <string.h>
 #include <dirent.h>
+#include <stdbool.h>
 
 #define MAX_SIZE 1024
 
@@ -18,6 +19,14 @@ int is_regular_file(const char *path) {
 	struct stat st;
 	stat(path, &st);
 	return S_ISREG(st.st_mode);
+}
+
+bool check_file_exists(const char *pathname) {
+	struct stat st;
+	if (stat(pathname, &st) == -1) {
+		return false;
+	}
+	return true;
 }
 
 int link(const char *oldpath, const char *newpath) {
@@ -113,6 +122,11 @@ int link(const char *oldpath, const char *newpath) {
 
 int open(const char *pathname, int flags, ...) {
 	backup_open = dlsym(RTLD_NEXT, "open");
+
+	if ((flags & O_DIRECTORY) || check_file_exists(pathname) == false) {
+		return backup_open(pathname, flags, S_IRWXU);
+	}
+
 	int fd = backup_open(pathname, flags, S_IRWXU);
 	if (fd == -1) {
 		return -1;
@@ -214,6 +228,11 @@ int open(const char *pathname, int flags, ...) {
 
 int openat(int dirfd, const char *pathname, int flags, ...) {
 	backup_openat = dlsym(RTLD_NEXT, "openat");
+
+	if ((flags & O_DIRECTORY) || check_file_exists(pathname) == false) {
+		return backup_openat(dirfd, pathname, flags, S_IRWXU);
+	}
+
 	int fd = backup_openat(dirfd, pathname, flags, S_IRWXU);
 	if (fd == -1) {
 		return -1;
