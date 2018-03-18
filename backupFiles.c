@@ -57,8 +57,8 @@ int open(const char *pathname, int flags, ...) {
 		}
 		fname[num] = '\0';
 
-		unsigned long cur_timestamp = (unsigned long) time(NULL);
-		snprintf(backup_loc, MAX_SIZE, "%s/%s_%lu", backup_loc, fname, cur_timestamp);
+		unsigned long cur_timestamp = (unsigned long)time(NULL);
+		snprintf(backup_loc + strlen(backup_loc), MAX_SIZE, "/%s_%lu", fname, cur_timestamp);
 		free(fname);
 
 		int fd_old = fd;
@@ -70,7 +70,8 @@ int open(const char *pathname, int flags, ...) {
 				return -1;
 			}
 		}
-		int fd_new = backup_open(pathname, O_WRONLY, S_IRWXU);
+		perror("Opened file for reading successful");
+		int fd_new = backup_open(backup_loc, O_RDWR | O_CREAT, S_IRWXU);
 		if (fd_new == -1) {
 			close(fd_old);
 			if (fd_old != fd) {
@@ -79,6 +80,7 @@ int open(const char *pathname, int flags, ...) {
 			free(backup_loc);
 			return -1;
 		}
+		perror("Opened file for writing successful");
 
 		int nread = -1;
 		char buf[MAX_SIZE] = {0};
