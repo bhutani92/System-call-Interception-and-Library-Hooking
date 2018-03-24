@@ -17,6 +17,7 @@ int (*backup_openat)(int dirfd, const char *pathname, int flags, ...);
 int (*backup_creat)(const char *pathname, mode_t mode);
 int (*backup_link)(const char *oldpath, const char *newpath);
 int (*backup_unlink)(const char *pathname);
+int (*backup_fflush)(FILE* stream);
 
 int is_regular_file(const char *path) {
 	struct stat st;
@@ -30,14 +31,6 @@ bool check_file_exists(const char *pathname) {
 		return false;
 	}
 	return true;
-}
-
-int fflush(FILE *stream) {
-	// TODO
-}
-
-int linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, int flags) {
-	// TODO
 }
 
 int unlink(const char *pathname) {
@@ -94,8 +87,8 @@ int unlink(const char *pathname) {
 			return -1;
 		}
 
-		char err_buf[MAX_SIZE] = {0};
-		/*snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
+		/*char err_buf[MAX_SIZE] = {0};
+		snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
 		perror(err_buf);*/
 
 		int fd_new = backup_open(backup_loc, O_RDWR | O_CREAT, S_IRWXU);
@@ -184,8 +177,8 @@ int link(const char *oldpath, const char *newpath) {
 			return -1;
 		}
 
-		char err_buf[MAX_SIZE] = {0};
-		/*snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", oldpath);
+		/*char err_buf[MAX_SIZE] = {0};
+		snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", oldpath);
 		perror(err_buf);*/
 
 		int fd_new = backup_open(backup_loc, O_RDWR | O_CREAT, S_IRWXU);
@@ -274,8 +267,8 @@ int creat(const char *pathname, mode_t mode) {
 			return -1;
 		}
 
-		char err_buf[MAX_SIZE] = {0};
-		/*snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
+		/*char err_buf[MAX_SIZE] = {0};
+		snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
 		perror(err_buf);*/
 
 		int fd_new = backup_open(backup_loc, O_RDWR | O_CREAT, S_IRWXU);
@@ -324,7 +317,7 @@ int open(const char *pathname, int flags, ...) {
 		return -1;
 	}
 
-	if (is_regular_file(pathname) && (flags & O_WRONLY) || (flags & O_RDWR)) {
+	if (is_regular_file(pathname) && ((flags & O_WRONLY) || (flags & O_RDWR))) {
 		char *backup_loc = (char *)malloc(MAX_SIZE * sizeof(char));
 		if (backup_loc == NULL) {
 			close(fd);
@@ -376,8 +369,8 @@ int open(const char *pathname, int flags, ...) {
 			}
 		}
 
-		char err_buf[MAX_SIZE] = {0};
-		/*snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
+		/*char err_buf[MAX_SIZE] = {0};
+		snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
 		perror(err_buf);*/
 
 		int fd_new = backup_open(backup_loc, O_RDWR | O_CREAT, S_IRWXU);
@@ -434,7 +427,7 @@ int openat(int dirfd, const char *pathname, int flags, ...) {
 		return -1;
 	}
 
-	if (is_regular_file(pathname) && (flags & O_WRONLY) || (flags & O_RDWR)) {
+	if (is_regular_file(pathname) && ((flags & O_WRONLY) || (flags & O_RDWR))) {
 		char *backup_loc = (char *)malloc(MAX_SIZE * sizeof(char));
 		if (backup_loc == NULL) {
 			close(fd);
@@ -486,8 +479,8 @@ int openat(int dirfd, const char *pathname, int flags, ...) {
 			}
 		}
 
-		char err_buf[MAX_SIZE] = {0};
-		/*snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
+		/*char err_buf[MAX_SIZE] = {0};
+		snprintf(err_buf, MAX_SIZE, "Opened file %s for reading successfully", pathname);
 		perror(err_buf);*/
 
 		int fd_new = backup_openat(dirfd, backup_loc, O_RDWR | O_CREAT, S_IRWXU);
