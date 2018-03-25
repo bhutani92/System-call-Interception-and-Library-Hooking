@@ -20,8 +20,10 @@ The various system calls that can effect the file contents are -
 12. renameat - rename a file relative to fd
 13. truncate - truncate a file to a specified length
 
-I am creating backup files for most commonly used system calls i.e. open, openat, creat, link, unlink, fflush. For all other system calls, the exploit/backup program code is similar and backup files needs to be created in the same way.
+I am creating backup files for most commonly used system calls i.e. open, openat, creat, link, linkat, unlink, unlinkat. For all other system calls, the exploit/backup program code is similar and backup files needs to be created in the same way.
 These set of system calls are used by many editors to create, rename, overwrite or delete a file. 
+
+fflush system call is used when redirecting the output from stdout to a file. This can also be hooked eventually to save a backup if the file already exists. Currently it has not been implemented.
 
 Currently backups for regular files are created. However, if required backups for all files like symbolic links and other special files can also be created.
 All the SystemCalls mentioned above are modified and object code is located in backupFiles.so to create a backup when file is opened in write-only mode, renamed or deleted. However, when file attributes are changed or permissions are altered we are not creating any copies. If we intend to create copies when the permissions are altered, we can use stat system call to first check for file permissions and then create a backup file with same permissions/attributes and then copy the contents. As this function call has much of its code duplicated to open where we create a backup file simply, this has not been added currently.
